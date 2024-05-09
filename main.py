@@ -1,5 +1,4 @@
 import random
-import PyQt5
 from PyQt5 import uic, QtGui, QtCore, QtWidgets
 from PyQt5.QtMultimedia import QSoundEffect
 import sys
