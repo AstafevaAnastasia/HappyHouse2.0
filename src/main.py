@@ -251,6 +251,7 @@ class start_ui(QtWidgets.QWidget):
         shadow.setYOffset(4)
 
         self.setStyleSheet("background-color: #545454;")
+        self.playButton.setStyleSheet("text-align: center;")
         self.playButton.setStyleSheet("color: #98be03;")
         self.playButton.setGraphicsEffect(shadow)
 
