@@ -353,7 +353,7 @@ class play_ui(QtWidgets.QWidget):
             for j in range(self.board_size):
                 test_button = QtWidgets.QPushButton()
                 test_button.setMinimumSize(75, 75)
-                #test_button.setMaximumSize(50, 50)
+                test_button.setMaximumSize(50, 50)
                 test_button.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
                 font = QtGui.QFont("MS Shell", 15)
                 font.setBold(True)
