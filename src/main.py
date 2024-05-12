@@ -233,8 +233,8 @@ def play_game(size: int):
 #* Functions, related to UI:
 #* =========================
 
-#* GLOBAL VARIABLES
-VOLUME = 0.5
+#* GLOBAL VARIABLES 0.5
+VOLUME = 0.3
 FAIL_CHANCE = 0.1
 #* ================
 
