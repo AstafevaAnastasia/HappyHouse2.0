@@ -4,47 +4,37 @@ from PyQt5.QtMultimedia import QSoundEffect
 import sys
 
 def create_board(size: int) -> list:
-    """
-    Creates a Tic Tac Toe board of specified size.
-    """
     return [[' ' for _ in range(size)] for _ in range(size)]
 
 def print_board(board: list):
-    """
-    Prints the current state of the board.
-    """
     size = len(board)
     cnt = 1
-    print("  " + " ".join(list(map(str, (range(1, size+1))))))
+    print("  " + " ".join(list(map(str, (range(1, size + 1))))))
     for row in board:
         print(f"{cnt} " + "|".join(row))
         print("  " + "-" * (size * 2 - 1))
         cnt += 1
 
 def get_player_move(board: list) -> tuple:
-    """
-    Gets the player's move coordinates.
-    """
     size = len(board)
     while True:
         try:
             row, col = map(int, input("Enter row and column (1-{}): ".format(size)).split())
-            if 1 <= row <= size and 1 <= col <= size and board[row-1][col-1] == ' ':
-                return row-1, col-1
+            if 1 <= row <= size and 1 <= col <= size and board[row - 1][col - 1] == ' ':
+                return row - 1, col - 1
             else:
                 print("Invalid move. Try again.")
         except ValueError:
             print("Invalid input. Try again.")
 
 def get_ai_move(board: list, player_symbol: str, ai_symbol: str, fail_chance: float = 0.1) -> tuple:
-    
     size = len(board)
     win_condition = 4 if size > 3 else 3
 
     # 0. Check if AI moves randomly
     if random.random() <= fail_chance:
         available_moves = [(i, j) for i in range(size) for j in range(size) if board[i][j] == ' ']
-        #print("Check 0")
+        # print("Check 0")
         return random.choice(available_moves)
 
     # 1. Check if AI can win in the next move
@@ -53,10 +43,10 @@ def get_ai_move(board: list, player_symbol: str, ai_symbol: str, fail_chance: fl
             if board[i][j] == ' ':
                 board[i][j] = ai_symbol  # Temporarily place the AI symbol
                 if check_win(board, ai_symbol):
-                    #print("Check 1")
+                    # print("Check 1")
                     return i, j
                 board[i][j] = ' '  # Reset the cell
-    
+
     # 2. Check if the player is about to win and block
     # TODO: Instead of two loops, write down i, j into the list and prioritise ones that are from depth 1
     for i in range(size):
@@ -64,7 +54,7 @@ def get_ai_move(board: list, player_symbol: str, ai_symbol: str, fail_chance: fl
             if board[i][j] == ' ':
                 board[i][j] = player_symbol  # Temporarily place the player symbol
                 if check_win(board, player_symbol):
-                    #print("Check 2 depth 1")
+                    # print("Check 2 depth 1")
                     board[i][j] = ' '  # Reset the cell
                     return i, j
                 board[i][j] = ' '  # Reset the cell
@@ -73,19 +63,18 @@ def get_ai_move(board: list, player_symbol: str, ai_symbol: str, fail_chance: fl
         for i in range(size):
             for j in range(size):
                 if board[i][j] == ' ':
-                    board[i][j] = player_symbol  # Temporarily place the player symbol 
+                    board[i][j] = player_symbol  # Temporarily place the player symbol
                     for i2 in range(size):
                         for j2 in range(size):
                             if board[i2][j2] == ' ':
                                 board[i2][j2] = player_symbol
                                 if check_win(board, player_symbol):
-                                    #print("Check 2 depth 2")
+                                    # print("Check 2 depth 2")
                                     board[i][j] = ' '  # Reset the cell
                                     board[i2][j2] = ' '  # Reset the cell
                                     return i2, j2
                                 board[i2][j2] = ' '
                     board[i][j] = ' '  # Reset the cell
-                   
 
     # 3. Try to create a row of AI symbols
     for i in range(size):
@@ -93,20 +82,16 @@ def get_ai_move(board: list, player_symbol: str, ai_symbol: str, fail_chance: fl
             if board[i][j] == ' ':
                 board[i][j] = ai_symbol
                 if check_potential_win(board, ai_symbol, win_condition - 1):
-                    #print("Check 3")
+                    # print("Check 3")
                     return i, j
                 board[i][j] = ' '
 
     # 4. If no strategic move, choose randomly
     available_moves = [(i, j) for i in range(size) for j in range(size) if board[i][j] == ' ']
-    #print("Check 4")
+    # print("Check 4")
     return random.choice(available_moves)
 
 def check_potential_win(board: list, symbol: str, consecutive_count: int) -> bool:
-    """
-    Checks if placing the symbol at any empty cell would create 
-    a row with the specified number of consecutive symbols.
-    """
     size = len(board)
 
     # Check rows and columns
@@ -123,81 +108,73 @@ def check_potential_win(board: list, symbol: str, consecutive_count: int) -> boo
             else:
                 count_col = 0
             if count_row == consecutive_count or count_col == consecutive_count:
-                #print(f"Player wins on row {i} col {j}")
+                # print(f"Player wins on row {i} col {j}")
                 return True
 
     # Check diagonals (top-left to bottom-right)
     for i in range(size - consecutive_count + 1):
         count = 0
         for k in range(consecutive_count):
-            if board[i+k][i+k] == symbol:
+            if board[i + k][i + k] == symbol:
                 count += 1
             else:
                 count = 0
         if count == consecutive_count:
-            #print(f"Player wins on {i} diag top-left to bottom-right")
+            # print(f"Player wins on {i} diag top-left to bottom-right")
             return True
 
     # Check diagonals (bottom-left to top-right)
     for i in range(consecutive_count - 1, size):
         count = 0
         for k in range(consecutive_count):
-            if board[i-k][k] == symbol:
+            if board[i - k][k] == symbol:
                 count += 1
             else:
                 count = 0
         if count == consecutive_count:
-            #print(f"Player wins on {i} diag bottom-left to top-right")
+            # print(f"Player wins on {i} diag bottom-left to top-right")
             return True
 
     return False
 
 def check_win(board: list, symbol: str) -> bool:
-    """
-    Checks if the given symbol has won the game.
-    """
     size = len(board)
     win_condition = 4 if size >= 4 else 3
 
     # Check rows
     for row in board:
         for i in range(size - win_condition + 1):
-            if all(row[i+k] == symbol for k in range(win_condition)):
+            if all(row[i + k] == symbol for k in range(win_condition)):
                 return True
 
     # Check columns
     for col in range(size):
         for i in range(size - win_condition + 1):
-            if all(board[i+k][col] == symbol for k in range(win_condition)):
+            if all(board[i + k][col] == symbol for k in range(win_condition)):
                 return True
 
     # Check diagonals (top-left to bottom-right)
     for row in range(size - win_condition + 1):
         for col in range(size - win_condition + 1):
-            if all(board[row+k][col+k] == symbol for k in range(win_condition)):
+            if all(board[row + k][col + k] == symbol for k in range(win_condition)):
                 return True
 
     # Check diagonals (bottom-left to top-right)
     for row in range(win_condition - 1, size):
         for col in range(size - win_condition + 1):
-            if all(board[row-k][col+k] == symbol for k in range(win_condition)):
+            if all(board[row - k][col + k] == symbol for k in range(win_condition)):
                 return True
 
     return False
 
 def is_board_full(board: list) -> bool:
-    """
-    Checks if the board is full.
-    """
     for row in board:
         if ' ' in row:
             return False
     return True
 
+
 def play_game(size: int):
-    """
-    Main game loop.
-    """
     board = create_board(size)
     player_symbol = 'X'
     ai_symbol = 'O'
@@ -211,7 +188,7 @@ def play_game(size: int):
         else:
             row, col = get_ai_move(board, player_symbol, ai_symbol)
             board[row][col] = ai_symbol
-            print("AI played at ({}, {})".format(row+1, col+1))
+            print("AI played at ({}, {})".format(row + 1, col + 1))
 
         if check_win(board, player_symbol):
             print_board(board)
@@ -228,22 +205,16 @@ def play_game(size: int):
 
         player_turn = not player_turn
 
-
-#* =========================
-#* Functions, related to UI:
-#* =========================
-
-#* GLOBAL VARIABLES 0.5
+# * Functions, related to UI:
+# * GLOBAL VARIABLES 0.5
 VOLUME = 0.3
 FAIL_CHANCE = 0.1
-#* ================
 
 class start_ui(QtWidgets.QWidget):
 
     def __init__(self):
         super(start_ui, self).__init__()
         uic.loadUi("start.ui", self)
-
 
         shadow = QtWidgets.QGraphicsDropShadowEffect()
         shadow.setBlurRadius(4)
@@ -256,7 +227,7 @@ class start_ui(QtWidgets.QWidget):
         self.playButton.setGraphicsEffect(shadow)
 
         self.playButton.clicked.connect(self.create_main_window)
-    
+
     def create_main_window(self):
         main_window = main_ui()
         main_window.show()
@@ -286,7 +257,6 @@ class main_ui(QtWidgets.QMainWindow):
         self.radiobtn3x3.setStyleSheet("color: #98be03;")
         self.radiobtn5x5.setStyleSheet("color: #98be03;")
 
-
         self.playAI.clicked.connect(lambda: self.play_game(against_ai=True))
         self.playFriend.clicked.connect(lambda: self.play_game(against_ai=False))
 
@@ -303,10 +273,10 @@ class main_ui(QtWidgets.QMainWindow):
             board_size = 3
         elif self.radiobtn5x5.isChecked():
             board_size = 5
-        
+
         self.play_window = play_ui(board_size=board_size, against_ai=against_ai, fail_chance=0.05)
         self.play_window.show()
-        
+
     def play_music(self):
         if self.sender().isChecked():
             self.sender().setStyleSheet("background-image: url('music_on.png');")
@@ -316,13 +286,15 @@ class main_ui(QtWidgets.QMainWindow):
             self.music.stop()
 
 class play_ui(QtWidgets.QWidget):
-    
+
     def __init__(self, board_size=3, against_ai=True, fail_chance=FAIL_CHANCE):
         super(play_ui, self).__init__()
         uic.loadUi("play_field.ui", self)
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowCloseButtonHint)
         self.setStyleSheet("background-color: #545454;")
 
+        self.player1_score = 0
+        self.player2_score = 0
 
         self.initial_fail_chance = fail_chance
         self.fail_chance = self.initial_fail_chance
@@ -336,18 +308,18 @@ class play_ui(QtWidgets.QWidget):
         self.player_to_play = 1
         self.against_ai = against_ai
 
-        self.win_message = "" # Message that shows in QMessageBox after the game has ended
+        self.win_message = ""  # Message that shows in QMessageBox after the game has ended
         self.gameover_message_box = QtWidgets.QMessageBox()
         self.gameover_message_box.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
         self.gameover_message_box.addButton("Играть снова!", QtWidgets.QMessageBox.YesRole)
         self.gameover_message_box.addButton("Закрыть", QtWidgets.QMessageBox.NoRole)
         self.gameover_message_box.setWindowTitle("Игра закончена!")
-        #self.gameover_message_box.setStyleSheet("background-color: #545454;")
-        #self.gameover_message_box.setStyleSheet("color: #98be03;")
+        # self.gameover_message_box.setStyleSheet("background-color: #545454;")
+        # self.gameover_message_box.setStyleSheet("color: #98be03;")
 
         self.isGameFinished = False
 
-        #* Generate buttons
+        # * Generate buttons
         for i in range(self.board_size):
             buttons = []
             for j in range(self.board_size):
@@ -372,116 +344,120 @@ class play_ui(QtWidgets.QWidget):
         self.groupBox.setTitle("Игра против Шрека" if self.against_ai else "Игра с другом: ход Х")
         self.groupBox.setStyleSheet("color: #98be03;")
         self.setFixedSize(self.minimumSizeHint())
-    
+
     def process_button_press(self):
-        #* If playing against an AI:
+        # * If playing against an AI:
         if self.against_ai:
-            #* Player move
-            #self.sender().setIcon(QtGui.QIcon("x.png"))
-            #self.sender().setIconSize(QtCore.QSize(75,75))
+            # * Player move
+            # self.sender().setIcon(QtGui.QIcon("x.png"))
+            # self.sender().setIconSize(QtCore.QSize(75,75))
             self.sender().setStyleSheet("background-image: url('x.png');")
             self.board[self.sender().x_coord][self.sender().y_coord] = self.PLAYER_1
-            #self.sender().setText(self.PLAYER_1)
+            # self.sender().setText(self.PLAYER_1)
             self.sender().setEnabled(False)
             if check_win(self.board, self.PLAYER_1):
-                #print("You win!")
-                self.win_message = "Вы выиграли!"
+                # print("You win!")
+                self.player1_score += 1
+                self.win_message = f"Вы выиграли!\nСчёт: {self.player1_score} : {self.player2_score}"
                 self.isGameFinished = True
             elif is_board_full(self.board):
-                #print("It's a tie!")
-                self.win_message = "Ничья!"
+                # print("It's a tie!")
+                self.win_message = f"Ничья!\nСчёт: {self.player1_score} : {self.player2_score}"
                 self.isGameFinished = True
-            
+
             if self.isGameFinished == False:
-                #* AI move
-                #? Small workaround to add pseudorandom to fail chance
-                #? and to keep code working both as GUI app and in console.
-                if random.random() <= self.fail_chance: #* If roll succeeded
+                # * AI move
+                # ? Small workaround to add pseudorandom to fail chance
+                # ? and to keep code working both as GUI app and in console.
+                if random.random() <= self.fail_chance:  # * If roll succeeded
                     self.fail_chance = self.initial_fail_chance
                     will_fail = 1
-                    #print("Fail roll succeeded.")
-                else: #* If roll failed
-                    self.fail_chance += self.initial_fail_chance #* Add initial fail chance to fail chance until roll succeeds
+                    # print("Fail roll succeeded.")
+                else:  # * If roll failed
+                    self.fail_chance += self.initial_fail_chance  # * Add initial fail chance to fail chance until roll succeeds
                     will_fail = -1
-                    #print(f"Fail roll failed. Fail chance is now {self.fail_chance}")
+                    # print(f"Fail roll failed. Fail chance is now {self.fail_chance}")
                 row, col = get_ai_move(self.board, self.PLAYER_1, self.PLAYER_2, will_fail)
                 self.board[row][col] = self.PLAYER_2
-                #self.buttons[row][col].setIcon(QtGui.QIcon("o.png"))
-                #self.buttons[row][col].setIconSize(QtCore.QSize(75,75))
+                # self.buttons[row][col].setIcon(QtGui.QIcon("o.png"))
+                # self.buttons[row][col].setIconSize(QtCore.QSize(75,75))
                 self.buttons[row][col].setStyleSheet("background-image: url('o.png');")
-                #self.buttons[row][col].setText(self.PLAYER_2)
+                # self.buttons[row][col].setText(self.PLAYER_2)
                 self.buttons[row][col].setEnabled(False)
 
                 if check_win(self.board, self.PLAYER_2):
-                    #print("AI wins!")
-                    self.win_message = "Шрек победил!"
+                    # print("AI wins!")
+                    self.player2_score += 1
+                    self.win_message = f"Шрек победил!\nСчёт: {self.player1_score} : {self.player2_score}"
                     self.isGameFinished = True
                 elif is_board_full(self.board):
-                    #print("It's a tie!")
-                    self.win_message = "Ничья!"
+                    # print("It's a tie!")
+                    self.win_message = f"Ничья!\nСчёт: {self.player1_score} : {self.player2_score}"
                     self.isGameFinished = True
 
-            #* Check if it is a tie or someone won
+            # * Check if it is a tie or someone won
             if self.isGameFinished:
                 for i in range(len(self.buttons)):
                     for j in range(len(self.buttons)):
                         self.buttons[i][j].setEnabled(False)
-                
+
                 self.gameover_message_box.setText(self.win_message)
                 self.gameover_message_box.exec_()
                 btn = self.gameover_message_box.buttonRole(self.gameover_message_box.clickedButton())
-                if btn == QtWidgets.QMessageBox.YesRole: #* Restart the game
+                if btn == QtWidgets.QMessageBox.YesRole:  # * Restart the game
                     for i in range(len(self.buttons)):
                         for j in range(len(self.buttons)):
                             self.buttons[i][j].setEnabled(True)
-                            #self.buttons[i][j].setText("")
+                            # self.buttons[i][j].setText("")
                             self.buttons[i][j].setStyleSheet("")
                     self.board = create_board(self.board_size)
                     self.player_to_play = 1
                     self.isGameFinished = False
                     self.win_message = ""
-        
-        #* If playing against friend:
+
+        # * If playing against friend:
         else:
-            #* 1st player's turn
+            # * 1st player's turn
             if self.player_to_play == 1:
-                #self.sender().setIcon(QtGui.QIcon("x.png"))
-                #self.sender().setIconSize(QtCore.QSize(75,75))
+                # self.sender().setIcon(QtGui.QIcon("x.png"))
+                # self.sender().setIconSize(QtCore.QSize(75,75))
                 self.sender().setStyleSheet("background-image: url('x.png');")
                 self.board[self.sender().x_coord][self.sender().y_coord] = self.PLAYER_1
-                #self.sender().setText(self.PLAYER_1)
+                # self.sender().setText(self.PLAYER_1)
                 self.sender().setEnabled(False)
                 if check_win(self.board, self.PLAYER_1):
-                    #print("Player 1 won!")
-                    self.win_message = "Первый игрок победил!"
+                    # print("Player 1 won!")
+                    self.player1_score += 1
+                    self.win_message = f"Первый игрок победил!\nСчёт: {self.player1_score} : {self.player2_score}"
                     self.isGameFinished = True
                 elif is_board_full(self.board):
-                    #print("It's a tie!")
-                    self.win_message = "Ничья!"
+                    # print("It's a tie!")
+                    self.win_message = f"Ничья!\nСчёт: {self.player1_score} : {self.player2_score}"
                     self.isGameFinished = True
                 self.player_to_play = 2
                 self.groupBox.setTitle("Игра с другом: ход О")
 
-            #* 2nd player's turn
+            # * 2nd player's turn
             elif self.player_to_play == 2:
-                #self.sender().setIcon(QtGui.QIcon("o.png"))
-                #self.sender().setIconSize(QtCore.QSize(75,75))
+                # self.sender().setIcon(QtGui.QIcon("o.png"))
+                # self.sender().setIconSize(QtCore.QSize(75,75))
                 self.sender().setStyleSheet("background-image: url('o.png');")
                 self.board[self.sender().x_coord][self.sender().y_coord] = self.PLAYER_2
-                #self.sender().setText(self.PLAYER_2)
+                # self.sender().setText(self.PLAYER_2)
                 self.sender().setEnabled(False)
                 if check_win(self.board, self.PLAYER_2):
-                    #print("Player 2 won!")
-                    self.win_message = "Второй игрок победил!"
+                    # print("Player 2 won!")
+                    self.player2_score += 1
+                    self.win_message = f"Второй игрок победил!\nСчёт: {self.player1_score} : {self.player2_score}"
                     self.isGameFinished = True
                 elif is_board_full(self.board):
-                    #print("It's a tie!")
-                    self.win_message = "Ничья!"
+                    # print("It's a tie!")
+                    self.win_message = f"Ничья!\nСчёт: {self.player1_score} : {self.player2_score}"
                     self.isGameFinished = True
                 self.player_to_play = 1
                 self.groupBox.setTitle("Игра с другом: ход Х")
-            
-            #* Check if it is a tie or someone won
+
+            # * Check if it is a tie or someone won
             if self.isGameFinished:
                 for i in range(len(self.buttons)):
                     for j in range(len(self.buttons)):
@@ -490,11 +466,11 @@ class play_ui(QtWidgets.QWidget):
                 self.gameover_message_box.setText(self.win_message)
                 self.gameover_message_box.exec_()
                 btn = self.gameover_message_box.buttonRole(self.gameover_message_box.clickedButton())
-                if btn == QtWidgets.QMessageBox.YesRole: #* Restart the game
+                if btn == QtWidgets.QMessageBox.YesRole:  # * Restart the game
                     for i in range(len(self.buttons)):
                         for j in range(len(self.buttons)):
                             self.buttons[i][j].setEnabled(True)
-                            #self.buttons[i][j].setText("")
+                            # self.buttons[i][j].setText("")
                             self.buttons[i][j].setStyleSheet("")
                     self.board = create_board(self.board_size)
                     self.player_to_play = 1
@@ -502,10 +478,10 @@ class play_ui(QtWidgets.QWidget):
                     self.win_message = ""
 
 if __name__ == "__main__":
-    #board_size = int(input("Enter board size (e.g., 3 for 3x3): "))
-    #play_game(board_size)
+    # board_size = int(input("Enter board size (e.g., 3 for 3x3): "))
+    # play_game(board_size)
     app = QtWidgets.QApplication(sys.argv)
-    #window = main_ui()
+    # window = main_ui()
     window = start_ui()
     window.show()
 
