@@ -263,6 +263,9 @@ class main_ui(QtWidgets.QMainWindow):
         self.musicBtn.clicked.connect(self.play_music)
         self.musicBtn.setStyleSheet("background-image: url('music_off.png');")
 
+        self.exitBtn.clicked.connect(self.close)
+        self.exitBtn.setStyleSheet("background-image: url('toilet.png');")
+
         self.music = QSoundEffect()
         self.music.setSource(QtCore.QUrl.fromLocalFile("all_star.wav"))
         self.music.setLoopCount(QSoundEffect.Infinite)
@@ -414,6 +417,8 @@ class play_ui(QtWidgets.QWidget):
                     self.player_to_play = 1
                     self.isGameFinished = False
                     self.win_message = ""
+                elif btn == QtWidgets.QMessageBox.NoRole:  # Закрыть приложение
+                    self.close()
 
         # * If playing against friend:
         else:
@@ -476,6 +481,8 @@ class play_ui(QtWidgets.QWidget):
                     self.player_to_play = 1
                     self.isGameFinished = False
                     self.win_message = ""
+                elif btn == QtWidgets.QMessageBox.NoRole:  # Закрыть приложение
+                    self.close()
 
 if __name__ == "__main__":
     # board_size = int(input("Enter board size (e.g., 3 for 3x3): "))
